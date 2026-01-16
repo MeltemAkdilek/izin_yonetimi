@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Tez Medikal İzin Yönetim Sistemi</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+
+  <style>
+    body {
+      background-color: var(--neutral-50);
+    }
+
+    .dashboard-layout {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dashboard-content {
+      flex: 1;
+      padding: 24px;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--neutral-200);
+      transition: all 0.2s;
+    }
+
+    .stat-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .stat-card.primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      border: none;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0.8;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .stat-card.primary .stat-label,
+    .stat-card.primary .stat-value {
+      color: white;
+    }
+
+    .action-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-content {
+        padding: 16px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stat-value {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-layout">
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="navbar-brand">
+        <div style="width: 32px; height: 32px; background: var(--primary); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px;">
+          TEZ
+        </div>
+        <span>İzin Yönetim Sistemi</span>
+      </div>
+
+      <div class="navbar-menu">
+        <div class="dropdown">
+          <button class="btn btn-secondary btn-sm" data-dropdown-toggle="notification-dropdown" style="position: relative;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span id="notification-badge" class="badge badge-error" style="position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 2px 4px; font-size: 10px;">2</span>
+          </button>
+          <div id="notification-dropdown" class="dropdown-menu" style="display: none; min-width: 320px;">
+            <div style="padding: 12px 16px; border-bottom: 1px solid var(--neutral-200);">
+              <p style="margin: 0; font-weight: 600; font-size: 14px;">Bildirimler</p>
+            </div>
+            <div id="notification-list">
+              <!-- Bildirimler buraya yüklenecek -->
+            </div>
+          </div>
+        </div>
+
+        <div class="dropdown">
+          <button class="btn btn-secondary btn-sm" data-dropdown-toggle="user-dropdown">
+            <span id="user-name">Kullanıcı</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div id="user-dropdown" class="dropdown-menu" style="display: none;">
+            <button class="dropdown-item" onclick="window.location.href='../index.html'">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              Çıkış Yap
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="dashboard-content fade-in">
+      <!-- Welcome Section -->
+      <div style="margin-bottom: 32px;">
+        <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">Hoş Geldiniz, <span id="welcome-name"></span></h1>
+        <p class="text-muted" id="user-info"></p>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card primary">
+          <div class="stat-label">Kalan İzin</div>
+          <div class="stat-value"><span id="stat-kalan">0</span> <span style="font-size: 18px; opacity: 0.8;">gün</span></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Hak Edilen İzin</div>
+          <div class="stat-value text-primary"><span id="stat-hak-edilen">0</span> <span style="font-size: 18px; color: var(--neutral-500);">gün</span></div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Kullanılan İzin</div>
+          <div class="stat-value text-warning"><span id="stat-kullanilan">0</span> <span style="font-size: 18px; color: var(--neutral-500);">gün</span></div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <a href="./yeni-izin.html" class="btn btn-primary btn-lg" style="text-decoration: none;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Yeni İzin Talebi Oluştur
+        </a>
+
+        <button class="btn btn-secondary btn-lg" onclick="scrollToTalepler()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          İzin Geçmişimi Görüntüle
+        </button>
+      </div>
+
+      <!-- Bekleyen İşlemler -->
+      <div id="bekleyen-islemler" style="display: none; margin-bottom: 32px;">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title" style="margin: 0;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 8px; color: var(--warning);">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              Bekleyen İşlemleriniz
+            </h3>
+          </div>
+          <div class="card-body">
+            <div id="bekleyen-islemler-liste"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- İzin Taleplerim -->
+      <div class="card">
+        <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
+          <h3 class="card-title" style="margin: 0;">İzin Taleplerim</h3>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-sm btn-outline" onclick="filterTalepler('all')">Tümü</button>
+            <button class="btn btn-sm btn-outline" onclick="filterTalepler('beklemede')">Bekleyen</button>
+            <button class="btn btn-sm btn-outline" onclick="filterTalepler('onaylandi')">Onaylanan</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-wrapper">
+            <table class="table" id="talepler-table">
+              <thead>
+                <tr>
+                  <th>İzin Tipi</th>
+                  <th>Tarih Aralığı</th>
+                  <th>Süre</th>
+                  <th>Talep Tarihi</th>
+                  <th>Durum</th>
+                  <th>İşlem</th>
+                </tr>
+              </thead>
+              <tbody id="talepler-tbody">
+                <!-- Talepler buraya yüklenecek -->
+              </tbody>
+            </table>
+          </div>
+
+          <div id="empty-state" style="display: none;">
+            <div class="empty-state">
+              <div class="empty-state-icon">📋</div>
+              <h3 class="empty-state-title">Henüz İzin Talebiniz Yok</h3>
+              <p class="empty-state-description">
+                Yeni bir izin talebi oluşturmak için yukarıdaki butona tıklayın.
+              </p>
+              <a href="./yeni-izin.html" class="btn btn-primary">Yeni İzin Talebi Oluştur</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Talep Detay Modal -->
+  <div id="modal-backdrop" class="modal-backdrop" style="display: none;"></div>
+  <div id="talep-detay-modal" class="modal" style="display: none;">
+    <div class="modal-header">
+      <h3 class="modal-title">İzin Talebi Detayı</h3>
+      <button class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-content">
+      <!-- Detay içeriği buraya yüklenecek -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="window.IzinYonetim.closeModal()">Kapat</button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../assets/js/mockup-data.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script>
+    let currentUser = null;
+    let allTalepler = [];
+    let currentFilter = 'all';
+
+    // Sayfa yüklendiğinde
+    document.addEventListener('DOMContentLoaded', function() {
+      // Kullanıcı kontrolü
+      const userJson = localStorage.getItem('currentUser');
+      if (!userJson) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      currentUser = JSON.parse(userJson);
+
+      // Sayfayı yükle
+      loadUserInfo();
+      loadStats();
+      loadBekleyenIslemler();
+      loadTalepler();
+      loadNotifications();
+    });
+
+    function loadUserInfo() {
+      if (!currentUser) {
+        console.error('Kullanıcı bulunamadı!');
+        return;
+      }
+      document.getElementById('user-name').textContent = currentUser.adSoyad ? currentUser.adSoyad.split(' ')[0] : 'Personel';
+      document.getElementById('welcome-name').textContent = currentUser.adSoyad ? currentUser.adSoyad.split(' ')[0] : 'Personel';
+      document.getElementById('user-info').textContent =
+        `${currentUser.unvan || ''} - ${currentUser.departman || ''} | ${currentUser.isYeri || ''}`;
+      console.log('Kullanıcı bilgileri yüklendi:', currentUser.adSoyad);
+    }
+
+    function loadStats() {
+      document.getElementById('stat-kalan').textContent = currentUser.kalanIzin;
+      document.getElementById('stat-hak-edilen').textContent = currentUser.hakEdilenIzin;
+      document.getElementById('stat-kullanilan').textContent = currentUser.kullanilanIzin;
+    }
+
+    function loadBekleyenIslemler() {
+      const bekleyenTalepler = window.MockData.izinTalepleri.filter(t =>
+        t.personelId === currentUser.id &&
+        (t.durum === 'Onaylandı' || t.durum === 'Fiziki Evrak Bekleniyor')
+      );
+
+      if (bekleyenTalepler.length === 0) {
+        document.getElementById('bekleyen-islemler').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('bekleyen-islemler').style.display = 'block';
+
+      const liste = document.getElementById('bekleyen-islemler-liste');
+      liste.innerHTML = bekleyenTalepler.map(t => `
+        <div class="alert alert-warning" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <div>
+            <strong>${t.izinTipi}</strong> - ${window.MockData.formatTarih(t.baslangicTarihi)}
+            <br>
+            <small>${t.durum === 'Onaylandı' ? 'Form oluşturup yüklemeniz bekleniyor' : 'Fiziki evrak teslimi bekleniyor'}</small>
+          </div>
+          <button class="btn btn-warning btn-sm" onclick="handleFormOlustur(${t.id})">
+            ${t.durum === 'Onaylandı' ? 'Form Oluştur' : 'Hatırlat'}
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function loadTalepler() {
+      allTalepler = window.MockData.getPersonelIzinTalepleri(currentUser.id);
+
+      if (allTalepler.length === 0) {
+        document.getElementById('talepler-table').style.display = 'none';
+        document.getElementById('empty-state').style.display = 'block';
+        return;
+      }
+
+      renderTalepler(allTalepler);
+    }
+
+    function renderTalepler(talepler) {
+      const tbody = document.getElementById('talepler-tbody');
+
+      if (talepler.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 40px; color: var(--neutral-500);">
+              Bu filtre için talep bulunamadı.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = talepler.map(t => `
+        <tr>
+          <td><strong>${t.izinTipi}</strong></td>
+          <td>${window.MockData.formatTarih(t.baslangicTarihi)} - ${window.MockData.formatTarih(t.bitisTarihi)}</td>
+          <td>${t.sure} gün</td>
+          <td>${window.MockData.formatTarih(t.talepTarihi)}</td>
+          <td>
+            <span class="badge ${window.MockData.getDurumBadgeClass(t.durum)}">
+              ${t.durum}
+            </span>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-secondary" onclick="showTalepDetay(${t.id})">
+              Detay
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function filterTalepler(filter) {
+      currentFilter = filter;
+
+      let filtered = allTalepler;
+
+      if (filter === 'beklemede') {
+        filtered = allTalepler.filter(t =>
+          t.durum.includes('Bekliyor') || t.durum === 'Fiziki Evrak Bekleniyor'
+        );
+      } else if (filter === 'onaylandi') {
+        filtered = allTalepler.filter(t =>
+          t.durum === 'Onaylandı' || t.durum === 'Tamamlandı'
+        );
+      }
+
+      renderTalepler(filtered);
+
+      // Update button states
+      document.querySelectorAll('[onclick^="filterTalepler"]').forEach(btn => {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-outline');
+      });
+      event.target.classList.remove('btn-outline');
+      event.target.classList.add('btn-primary');
+    }
+
+    function showTalepDetay(talepId) {
+      const talep = allTalepler.find(t => t.id === talepId);
+      if (!talep) return;
+
+      const modalContent = document.getElementById('modal-content');
+      modalContent.innerHTML = `
+        <div style="display: grid; gap: 16px;">
+          <div class="card" style="margin: 0;">
+            <div class="card-body">
+              <h4 style="margin-bottom: 16px; color: var(--primary);">${talep.izinTipi}</h4>
+
+              <div style="display: grid; gap: 12px;">
+                <div style="display: grid; grid-template-columns: 140px 1fr; gap: 8px;">
+                  <span class="text-muted">Başlangıç Tarihi:</span>
+                  <strong>${window.MockData.formatTarih(talep.baslangicTarihi)}</strong>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 140px 1fr; gap: 8px;">
+                  <span class="text-muted">Bitiş Tarihi:</span>
+                  <strong>${window.MockData.formatTarih(talep.bitisTarihi)}</strong>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 140px 1fr; gap: 8px;">
+                  <span class="text-muted">İşe Başlama:</span>
+                  <strong>${window.MockData.formatTarih(talep.isBaslamaTarihi)}</strong>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 140px 1fr; gap: 8px;">
+                  <span class="text-muted">Süre:</span>
+                  <strong>${talep.sure} gün</strong>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 140px 1fr; gap: 8px;">
+                  <span class="text-muted">Durum:</span>
+                  <span class="badge ${window.MockData.getDurumBadgeClass(talep.durum)}">
+                    ${talep.durum}
+                  </span>
+                </div>
+
+                ${talep.evrakYuklendi ? `
+                  <div style="display: grid; grid-template-columns: 140px 1fr; gap: 8px;">
+                    <span class="text-muted">Evrak:</span>
+                    <span class="text-success">✓ Yüklendi (${talep.evrakDosya})</span>
+                  </div>
+                ` : ''}
+
+                ${talep.aciklama ? `
+                  <div style="display: grid; grid-template-columns: 140px 1fr; gap: 8px;">
+                    <span class="text-muted">Açıklama:</span>
+                    <span>${talep.aciklama}</span>
+                  </div>
+                ` : ''}
+
+                ${talep.yoneticiAciklama ? `
+                  <div class="alert alert-info" style="margin-top: 8px;">
+                    <strong>Yönetici Notu:</strong><br>
+                    ${talep.yoneticiAciklama}
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      window.IzinYonetim.openModal('talep-detay-modal');
+    }
+
+    function handleFormOlustur(talepId) {
+      window.IzinYonetim.showToast('Form oluşturma ekranına yönlendiriliyorsunuz...', 'info');
+      setTimeout(() => {
+        window.location.href = `./form-olustur.html?talepId=${talepId}`;
+      }, 1000);
+    }
+
+    function scrollToTalepler() {
+      document.getElementById('talepler-table').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function loadNotifications() {
+      const bildirimler = window.MockData.getOkunmamisBildirimler(currentUser.id);
+
+      document.getElementById('notification-badge').style.display =
+        bildirimler.length > 0 ? 'inline-flex' : 'none';
+      document.getElementById('notification-badge').textContent =
+        bildirimler.length > 9 ? '9+' : bildirimler.length;
+
+      const liste = document.getElementById('notification-list');
+
+      if (bildirimler.length === 0) {
+        liste.innerHTML = `
+          <div style="padding: 24px; text-align: center; color: var(--neutral-500);">
+            <p style="margin: 0;">Yeni bildiriminiz yok</p>
+          </div>
+        `;
+      } else {
+        liste.innerHTML = bildirimler.map(b => `
+          <div class="dropdown-item" style="padding: 12px 16px; border-bottom: 1px solid var(--neutral-100); cursor: default;">
+            <p style="margin: 0; font-weight: 600; font-size: 13px;">${b.baslik}</p>
+            <p style="margin: 4px 0 0 0; font-size: 12px; color: var(--neutral-600);">${b.mesaj}</p>
+            <p style="margin: 4px 0 0 0; font-size: 11px; color: var(--neutral-400);">
+              ${new Date(b.tarih).toLocaleString('tr-TR', {
+                day: '2-digit',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </p>
+          </div>
+        `).join('');
+      }
+    }
+  </script>
+</body>
+</html>

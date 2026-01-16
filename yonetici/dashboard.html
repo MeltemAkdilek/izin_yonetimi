@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yönetici Dashboard - Tez Medikal İzin Yönetim Sistemi</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+</head>
+<body style="background-color: var(--neutral-50);">
+  <div style="min-height: 100vh; display: flex; flex-direction: column;">
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="navbar-brand">
+        <div style="width: 32px; height: 32px; background: var(--primary); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px;">TEZ</div>
+        <span>İzin Yönetim Sistemi</span>
+      </div>
+      <div class="navbar-menu">
+        <div class="dropdown">
+          <button class="btn btn-secondary btn-sm" data-dropdown-toggle="user-dropdown">
+            <span id="user-name">Yönetici</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="user-dropdown" class="dropdown-menu" style="display: none;">
+            <button class="dropdown-item" onclick="window.location.href='../index.html'">Çıkış Yap</button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main style="flex: 1; padding: 24px; max-width: 1400px; margin: 0 auto; width: 100%;" class="fade-in">
+      <div style="margin-bottom: 32px;">
+        <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">Yönetici Paneli</h1>
+        <p class="text-muted" id="user-info">İzin taleplerini onaylayın veya reddedin</p>
+      </div>
+
+      <!-- Stats -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 32px;">
+        <div class="card" style="padding: 20px;">
+          <div class="text-muted" style="font-size: 14px; margin-bottom: 8px;">Bekleyen Talepler</div>
+          <div style="font-size: 32px; font-weight: 700; color: var(--warning);" id="stat-bekleyen">0</div>
+        </div>
+        <div class="card" style="padding: 20px;">
+          <div class="text-muted" style="font-size: 14px; margin-bottom: 8px;">Bu Ay Onaylanan</div>
+          <div style="font-size: 32px; font-weight: 700; color: var(--success);" id="stat-onaylanan">0</div>
+        </div>
+        <div class="card" style="padding: 20px;">
+          <div class="text-muted" style="font-size: 14px; margin-bottom: 8px;">Toplam Personel</div>
+          <div style="font-size: 32px; font-weight: 700; color: var(--primary);" id="stat-personel">0</div>
+        </div>
+      </div>
+
+      <!-- Onay Bekleyen Talepler -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title" style="margin: 0;">Onay Bekleyen İzin Talepleri</h3>
+        </div>
+        <div class="card-body">
+          <div class="table-wrapper">
+            <table class="table" id="talepler-table">
+              <thead>
+                <tr>
+                  <th>Personel</th>
+                  <th>Departman</th>
+                  <th>İzin Tipi</th>
+                  <th>Tarih Aralığı</th>
+                  <th>Süre</th>
+                  <th>Talep Tarihi</th>
+                  <th>İşlemler</th>
+                </tr>
+              </thead>
+              <tbody id="talepler-tbody"></tbody>
+            </table>
+          </div>
+          <div id="empty-state" style="display: none;">
+            <div class="empty-state">
+              <div class="empty-state-icon">✅</div>
+              <h3 class="empty-state-title">Tüm Talepler İncelendi</h3>
+              <p class="empty-state-description">Şu anda onay bekleyen izin talebi bulunmamaktadır.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Detay Modal -->
+  <div id="modal-backdrop" class="modal-backdrop" style="display: none;"></div>
+  <div id="talep-modal" class="modal" style="display: none; max-width: 700px;">
+    <div class="modal-header">
+      <h3 class="modal-title">İzin Talebi Detayı</h3>
+      <button class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-content"></div>
+    <div class="modal-footer" id="modal-actions"></div>
+  </div>
+
+  <script src="../assets/js/mockup-data.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script>
+    let currentUser = null;
+    let allTalepler = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const userJson = localStorage.getItem('currentUser');
+      if (!userJson) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      currentUser = JSON.parse(userJson);
+      if (currentUser.rol !== 'yonetici') {
+        alert('Bu sayfaya erişim yetkiniz yok!');
+        window.location.href = '../index.html';
+        return;
+      }
+
+      loadUserInfo();
+      loadStats();
+      loadTalepler();
+    });
+
+    function loadUserInfo() {
+      if (!currentUser) {
+        console.error('Kullanıcı bulunamadı!');
+        return;
+      }
+      document.getElementById('user-name').textContent = currentUser.adSoyad ? currentUser.adSoyad.split(' ')[0] : 'Yönetici';
+      document.getElementById('user-info').textContent = `${currentUser.unvan || ''} - ${currentUser.departman || ''}`;
+      console.log('Kullanıcı bilgileri yüklendi:', currentUser.adSoyad);
+    }
+
+    function loadStats() {
+      const bekleyenTalepler = window.MockData.getYoneticiOnayBekleyenTalepler(currentUser.id);
+      document.getElementById('stat-bekleyen').textContent = bekleyenTalepler.length;
+      document.getElementById('stat-onaylanan').textContent = 3; // Mock
+      document.getElementById('stat-personel').textContent = window.MockData.personeller.filter(p => p.yoneticiId === currentUser.id).length;
+    }
+
+    function loadTalepler() {
+      allTalepler = window.MockData.getYoneticiOnayBekleyenTalepler(currentUser.id);
+
+      if (allTalepler.length === 0) {
+        document.getElementById('talepler-table').style.display = 'none';
+        document.getElementById('empty-state').style.display = 'block';
+        return;
+      }
+
+      const tbody = document.getElementById('talepler-tbody');
+      tbody.innerHTML = allTalepler.map(t => `
+        <tr>
+          <td><strong>${t.personelAdi}</strong></td>
+          <td>${t.personelDepartman}</td>
+          <td>${t.izinTipi}</td>
+          <td>${window.MockData.formatTarih(t.baslangicTarihi)} - ${window.MockData.formatTarih(t.bitisTarihi)}</td>
+          <td>${t.sure} gün</td>
+          <td>${window.MockData.formatTarih(t.talepTarihi)}</td>
+          <td>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-sm btn-primary" onclick="showTalepDetay(${t.id})">Detay</button>
+              <button class="btn btn-sm btn-success" onclick="onayTalep(${t.id})">Onayla</button>
+              <button class="btn btn-sm btn-error" onclick="reddetTalep(${t.id})">Reddet</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function showTalepDetay(talepId) {
+      const talep = allTalepler.find(t => t.id === talepId);
+      if (!talep) return;
+
+      const personel = window.MockData.getPersonelById(talep.personelId);
+
+      document.getElementById('modal-content').innerHTML = `
+        <div style="display: grid; gap: 16px;">
+          <div class="card" style="margin: 0; background: var(--neutral-50);">
+            <div class="card-body">
+              <h4 style="margin-bottom: 12px;">Personel Bilgileri</h4>
+              <div style="display: grid; gap: 8px;">
+                <div><strong>Ad Soyad:</strong> ${personel.adSoyad}</div>
+                <div><strong>Unvan:</strong> ${personel.unvan}</div>
+                <div><strong>Departman:</strong> ${personel.departman}</div>
+                <div><strong>İş Yeri:</strong> ${personel.isYeri}</div>
+                <div><strong>Kalan İzin:</strong> <span class="text-success">${personel.kalanIzin} gün</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h4 style="margin-bottom: 12px;">İzin Detayları</h4>
+            <div style="display: grid; gap: 8px;">
+              <div><strong>İzin Tipi:</strong> ${talep.izinTipi}</div>
+              <div><strong>Başlangıç:</strong> ${window.MockData.formatTarih(talep.baslangicTarihi)}</div>
+              <div><strong>Bitiş:</strong> ${window.MockData.formatTarih(talep.bitisTarihi)}</div>
+              <div><strong>İşe Başlama:</strong> ${window.MockData.formatTarih(talep.isBaslamaTarihi)}</div>
+              <div><strong>Süre:</strong> ${talep.sure} gün</div>
+              ${talep.evrakYuklendi ? '<div><strong>Evrak:</strong> <span class="text-success">✓ Yüklendi</span></div>' : ''}
+              ${talep.aciklama ? `<div><strong>Açıklama:</strong> ${talep.aciklama}</div>` : ''}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Yönetici Notu</label>
+            <textarea id="yoneticiNotu" class="form-control" rows="3" placeholder="İsteğe bağlı not ekleyebilirsiniz..."></textarea>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('modal-actions').innerHTML = `
+        <button class="btn btn-secondary" onclick="window.IzinYonetim.closeModal()">Kapat</button>
+        <button class="btn btn-error" onclick="reddetTalepModal(${talepId})">Reddet</button>
+        <button class="btn btn-success" onclick="onayTalepModal(${talepId})">Onayla</button>
+      `;
+
+      window.IzinYonetim.openModal('talep-modal');
+    }
+
+    function onayTalep(talepId) {
+      if (confirm('Bu izin talebini onaylamak istediğinizden emin misiniz?')) {
+        window.IzinYonetim.showToast('İzin talebi onaylandı!', 'success');
+        allTalepler = allTalepler.filter(t => t.id !== talepId);
+        loadTalepler();
+        loadStats();
+      }
+    }
+
+    function onayTalepModal(talepId) {
+      window.IzinYonetim.closeModal();
+      onayTalep(talepId);
+    }
+
+    function reddetTalep(talepId) {
+      if (confirm('Bu izin talebini reddetmek istediğinizden emin misiniz?')) {
+        window.IzinYonetim.showToast('İzin talebi reddedildi', 'error');
+        allTalepler = allTalepler.filter(t => t.id !== talepId);
+        loadTalepler();
+        loadStats();
+      }
+    }
+
+    function reddetTalepModal(talepId) {
+      const not = document.getElementById('yoneticiNotu').value;
+      if (!not.trim()) {
+        window.IzinYonetim.showToast('Lütfen red sebebini belirtin', 'warning');
+        return;
+      }
+      window.IzinYonetim.closeModal();
+      reddetTalep(talepId);
+    }
+  </script>
+</body>
+</html>

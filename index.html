@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Tez Medikal İzin Yönetim Sistemi">
+  <title>Giriş - Tez Medikal İzin Yönetim Sistemi</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <link rel="stylesheet" href="./assets/css/components.css">
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 420px;
+      padding: 20px;
+    }
+
+    .login-card {
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo-container {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo {
+      width: 180px;
+      height: auto;
+      margin: 0 auto 16px;
+    }
+
+    .login-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--neutral-900);
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .login-subtitle {
+      font-size: 14px;
+      color: var(--neutral-500);
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .quick-login {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid var(--neutral-200);
+    }
+
+    .quick-login-title {
+      font-size: 12px;
+      color: var(--neutral-500);
+      text-align: center;
+      margin-bottom: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .quick-login-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quick-login-btn {
+      padding: 8px 16px;
+      font-size: 13px;
+      border-radius: 6px;
+      border: 1px solid var(--neutral-300);
+      background: var(--neutral-50);
+      color: var(--neutral-700);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+
+    .quick-login-btn:hover {
+      background: var(--primary-lighter);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card fade-in">
+      <!-- Logo and Title -->
+      <div class="logo-container">
+        <div class="logo" style="background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; border-radius: 12px; padding: 20px;">
+          <span style="font-size: 32px; font-weight: 700;">TEZ</span>
+        </div>
+        <h1 class="login-title">İzin Yönetim Sistemi</h1>
+        <p class="login-subtitle">Hoş geldiniz, lütfen giriş yapın</p>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="email" class="form-label required">E-posta</label>
+          <input
+            type="email"
+            id="email"
+            class="form-control"
+            placeholder="ornek@tezmedikal.com"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label required">Şifre</label>
+          <input
+            type="password"
+            id="password"
+            class="form-control"
+            placeholder="••••••••"
+            required
+          >
+        </div>
+
+        <div class="form-check" style="margin-bottom: 24px;">
+          <input type="checkbox" id="remember" class="form-check-input">
+          <label for="remember" class="form-check-label">Beni hatırla</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg">
+          <span>Giriş Yap</span>
+        </button>
+
+        <div style="text-align: center; margin-top: 16px;">
+          <a href="#" style="font-size: 14px; color: var(--primary);">Şifremi unuttum</a>
+        </div>
+      </form>
+
+      <!-- Quick Login (For Demo/Test) -->
+      <div class="quick-login">
+        <p class="quick-login-title">Hızlı Giriş (Demo)</p>
+        <div class="quick-login-buttons">
+          <button class="quick-login-btn" onclick="quickLogin(1)">
+            👤 Ahmet Yılmaz - Personel (Saha)
+          </button>
+          <button class="quick-login-btn" onclick="quickLogin(2)">
+            👤 Ayşe Demir - İK Personeli
+          </button>
+          <button class="quick-login-btn" onclick="quickLogin(4)">
+            👤 Fatma Şahin - OSGB Mesul Müdür (Yönetici)
+          </button>
+          <button class="quick-login-btn" onclick="quickLogin(6)">
+            👤 Zeynep Arslan - Müşteri İlişkileri
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align: center; margin-top: 24px; color: white; font-size: 14px;">
+      <p style="margin: 0;">&copy; 2026 Tez Medikal A.Ş. Tüm hakları saklıdır.</p>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="./assets/js/mockup-data.js"></script>
+  <script src="./assets/js/main.js"></script>
+  <script>
+    function handleLogin(event) {
+      event.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      // Simple mock authentication
+      const user = window.MockData.personeller.find(p => p.email === email);
+
+      if (user) {
+        // Save user to localStorage
+        localStorage.setItem('currentUser', JSON.stringify(user));
+
+        // Show success message
+        window.IzinYonetim.showToast('Giriş başarılı! Yönlendiriliyorsunuz...', 'success');
+
+        // Redirect based on role
+        setTimeout(() => {
+          if (user.rol === 'yonetici') {
+            window.location.href = './yonetici/dashboard.html';
+          } else if (user.rol === 'ik') {
+            window.location.href = './ik/dashboard.html';
+          } else if (user.rol === 'musteri_iliskileri') {
+            window.location.href = './musteri-iliskileri/dashboard.html';
+          } else {
+            window.location.href = './personel/dashboard.html';
+          }
+        }, 1000);
+      } else {
+        window.IzinYonetim.showToast('E-posta veya şifre hatalı', 'error');
+      }
+    }
+
+    function quickLogin(userId) {
+      const user = window.MockData.getPersonelById(userId);
+
+      if (user) {
+        // Fill form with user data (for demo)
+        document.getElementById('email').value = user.email;
+        document.getElementById('password').value = '123456';
+
+        // Auto submit after 500ms
+        setTimeout(() => {
+          document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+        }, 500);
+      }
+    }
+
+    // Clear any existing session on load
+    // localStorage.removeItem('currentUser');
+  </script>
+</body>
+</html>

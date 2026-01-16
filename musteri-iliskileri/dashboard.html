@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Müşteri İlişkileri Dashboard - Tez Medikal İzin Yönetim Sistemi</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+</head>
+<body style="background-color: var(--neutral-50);">
+  <div style="min-height: 100vh; display: flex; flex-direction: column;">
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="navbar-brand">
+        <div style="width: 32px; height: 32px; background: var(--primary); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px;">TEZ</div>
+        <span>İzin Yönetim Sistemi - Müşteri İlişkileri Paneli</span>
+      </div>
+      <div class="navbar-menu">
+        <div class="dropdown">
+          <button class="btn btn-secondary btn-sm" data-dropdown-toggle="user-dropdown">
+            <span id="user-name">Müşteri İlişkileri</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div id="user-dropdown" class="dropdown-menu" style="display: none;">
+            <button class="dropdown-item" onclick="window.location.href='../index.html'">Çıkış Yap</button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main style="flex: 1; padding: 24px; max-width: 1400px; margin: 0 auto; width: 100%;" class="fade-in">
+      <div style="margin-bottom: 32px;">
+        <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">Müşteri İlişkileri Yönetim Paneli</h1>
+        <p class="text-muted">Müşteri bildirim gönderme, talep takibi ve görevlendirme kararları</p>
+      </div>
+
+      <!-- Stats -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 32px;">
+        <div class="card" style="padding: 20px;">
+          <div class="text-muted" style="font-size: 14px; margin-bottom: 8px;">Bildirim Gönderilecek</div>
+          <div style="font-size: 32px; font-weight: 700; color: var(--warning);" id="stat-bildirim">0</div>
+        </div>
+        <div class="card" style="padding: 20px;">
+          <div class="text-muted" style="font-size: 14px; margin-bottom: 8px;">Müşteri Dönüşü Bekleniyor</div>
+          <div style="font-size: 32px; font-weight: 700; color: var(--info);" id="stat-bekleyen">0</div>
+        </div>
+        <div class="card" style="padding: 20px;">
+          <div class="text-muted" style="font-size: 14px; margin-bottom: 8px;">Bu Ay Tamamlanan</div>
+          <div style="font-size: 32px; font-weight: 700; color: var(--success);" id="stat-tamamlanan">0</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" data-tab="bildirim-gonderilecek">Bildirim Gönderilecek İzinler</button>
+        <button class="tab" data-tab="musteri-donusu">Müşteri Dönüşü Bekleyenler</button>
+        <button class="tab" data-tab="tamamlanan">Tamamlanan Bildirimler</button>
+      </div>
+
+      <!-- Tab: Bildirim Gönderilecek -->
+      <div id="bildirim-gonderilecek" class="tab-content" style="display: block;">
+        <div class="card">
+          <div class="card-body">
+            <div class="alert alert-info" style="margin-bottom: 20px;">
+              <strong>Bilgi:</strong> T+4 ve üzeri süreli izinler için müşterilere otomatik bilgilendirme e-postası gönderilir.
+            </div>
+            <div class="table-wrapper">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Personel</th>
+                    <th>Firma</th>
+                    <th>İzin Tarihi</th>
+                    <th>Süre</th>
+                    <th>Bildirim Durumu</th>
+                    <th>İşlemler</th>
+                  </tr>
+                </thead>
+                <tbody id="bildirim-tbody">
+                  <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: var(--neutral-500);">
+                      Bildirim gönderilecek izin bulunmamaktadır.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Müşteri Dönüşü Bekleyenler -->
+      <div id="musteri-donusu" class="tab-content" style="display: none;">
+        <div class="card">
+          <div class="card-body">
+            <div class="alert alert-warning" style="margin-bottom: 20px;">
+              <strong>Uyarı:</strong> Müşteriler 3 iş günü içinde dönüş yapmazsa sistem otomatik olarak "Görevlendirmeyi Reddet" tetikler.
+            </div>
+            <div class="table-wrapper">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Personel</th>
+                    <th>Firma</th>
+                    <th>İzin Tarihi</th>
+                    <th>Kalan Süre</th>
+                    <th>Müşteri Talebi</th>
+                    <th>İşlemler</th>
+                  </tr>
+                </thead>
+                <tbody id="donus-tbody">
+                  <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: var(--neutral-500);">
+                      Müşteri dönüşü bekleyen talep bulunmamaktadır.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Tamamlanan -->
+      <div id="tamamlanan" class="tab-content" style="display: none;">
+        <div class="card">
+          <div class="card-body">
+            <div style="margin-bottom: 16px; display: flex; gap: 12px;">
+              <button class="btn btn-outline btn-sm">Excel'e Aktar</button>
+              <button class="btn btn-outline btn-sm">PDF'e Aktar</button>
+            </div>
+            <div class="table-wrapper">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Personel</th>
+                    <th>Firma</th>
+                    <th>İzin Tarihi</th>
+                    <th>Müşteri Yanıtı</th>
+                    <th>Tamamlanma Tarihi</th>
+                  </tr>
+                </thead>
+                <tbody id="tamamlanan-tbody">
+                  <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px; color: var(--neutral-500);">
+                      Henüz tamamlanmış bildirim bulunmamaktadır.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Bildirim Gönder Modal -->
+  <div id="modal-backdrop" class="modal-backdrop" style="display: none;"></div>
+  <div id="bildirim-modal" class="modal" style="display: none; max-width: 600px;">
+    <div class="modal-header">
+      <h3 class="modal-title">Müşteri Bildirim Gönder</h3>
+      <button class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-content"></div>
+    <div class="modal-footer" id="modal-actions"></div>
+  </div>
+
+  <script src="../assets/js/mockup-data.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script>
+    let currentUser = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const userJson = localStorage.getItem('currentUser');
+      if (!userJson) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      currentUser = JSON.parse(userJson);
+      if (currentUser.rol !== 'musteri_iliskileri') {
+        alert('Bu sayfaya erişim yetkiniz yok!');
+        window.location.href = '../index.html';
+        return;
+      }
+
+      loadUserInfo();
+      loadStats();
+      loadBildirimGonderilecek();
+      loadMusteriDonusu();
+      loadTamamlanan();
+    });
+
+    function loadUserInfo() {
+      if (!currentUser) {
+        console.error('Kullanıcı bulunamadı!');
+        return;
+      }
+      document.getElementById('user-name').textContent = currentUser.adSoyad ? currentUser.adSoyad.split(' ')[0] : 'Müşteri İlişkileri';
+      console.log('Kullanıcı bilgileri yüklendi:', currentUser.adSoyad);
+    }
+
+    function loadStats() {
+      // Mock stats
+      document.getElementById('stat-bildirim').textContent = 0;
+      document.getElementById('stat-bekleyen').textContent = 0;
+      document.getElementById('stat-tamamlanan').textContent = 0;
+    }
+
+    function loadBildirimGonderilecek() {
+      const tbody = document.getElementById('bildirim-tbody');
+      // Mock: T+4 ve üzeri izinler buraya gelecek
+      // Şu an için boş gösteriliyor
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: var(--neutral-500);">Bildirim gönderilecek izin bulunmamaktadır.</td></tr>';
+    }
+
+    function loadMusteriDonusu() {
+      const tbody = document.getElementById('donus-tbody');
+      // Mock: Müşteri dönüşü bekleyen izinler buraya gelecek
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: var(--neutral-500);">Müşteri dönüşü bekleyen talep bulunmamaktadır.</td></tr>';
+    }
+
+    function loadTamamlanan() {
+      const tbody = document.getElementById('tamamlanan-tbody');
+      // Mock: Tamamlanmış bildirimler
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--neutral-500);">Henüz tamamlanmış bildirim bulunmamaktadır.</td></tr>';
+    }
+
+    function showBildirimModal(talepId) {
+      document.getElementById('modal-content').innerHTML = `
+        <div style="display: grid; gap: 16px;">
+          <div class="card" style="margin: 0; background: var(--neutral-50);">
+            <div class="card-body">
+              <h4 style="margin-bottom: 12px;">Bildirim Bilgileri</h4>
+              <div style="display: grid; gap: 8px;">
+                <div><strong>Personel:</strong> Ahmet Yılmaz</div>
+                <div><strong>Firma:</strong> ABC Hastanesi</div>
+                <div><strong>İzin Tarihi:</strong> 20.01.2026 - 27.01.2026</div>
+                <div><strong>Süre:</strong> 8 gün</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="alert alert-info">
+            <strong>E-posta İçeriği:</strong><br><br>
+            Sayın Firma Yetkilisi,<br><br>
+            Personelimiz Ahmet Yılmaz, 20.01.2026 - 27.01.2026 tarihlerinde izinde olacaktır.<br><br>
+            Bu tarih aralığı için ek bir görevlendirme talebiniz olursa, lütfen 3 iş günü içerisinde belirtiniz.<br><br>
+            Teşekkür ederiz.<br>
+            Tez Medikal
+          </div>
+        </div>
+      `;
+
+      document.getElementById('modal-actions').innerHTML = `
+        <button class="btn btn-secondary" onclick="window.IzinYonetim.closeModal()">Kapat</button>
+        <button class="btn btn-primary" onclick="gonderBildirim()">Bildirim Gönder</button>
+      `;
+
+      window.IzinYonetim.openModal('bildirim-modal');
+    }
+
+    function gonderBildirim() {
+      window.IzinYonetim.closeModal();
+      window.IzinYonetim.showToast('Müşteri bildirimi gönderildi!', 'success');
+      loadBildirimGonderilecek();
+      loadStats();
+    }
+  </script>
+</body>
+</html>
